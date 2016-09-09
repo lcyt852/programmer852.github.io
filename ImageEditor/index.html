@@ -73,6 +73,7 @@ body, html {
 	background:#19294a;
 	position: fixed;
 	z-index: 9999999;
+	overflow: hidden;
 }
 .icon{
 	padding: 5px;
@@ -140,6 +141,20 @@ body, html {
 }
 .sizer.active{
 	background: #315177;	
+}
+
+.iconWrap{
+	position: relative;
+	display: inline-block;
+}
+#colorIndicator, #bgColorIndicator{
+	position: absolute;
+	top: 12px;
+	left: 12px;
+	height: 22px;
+	width: 22px;
+	background-color: #000;
+	pointer-events:none;
 }
 </style>
 

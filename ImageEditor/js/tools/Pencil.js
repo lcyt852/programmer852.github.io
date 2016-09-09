@@ -12,7 +12,8 @@ var Pencil = function(){
 }
 Pencil.prototype.init = function(){}
 Pencil.prototype.start = function(){
-	uiManager.toolbar_sizePicker.bar.show();	
+	uiManager.toolbar_sizePicker.bar.show();
+	uiManager.toolbar_sizePicker.bar.css('left',$(window).width()-56);	
 	this.layerHolder = layerManager.newLayer(this.getCanvas());	 	
 	this.canvas = this.layerHolder.layer;
 	this.$thumb = this.layerHolder.$thumb;

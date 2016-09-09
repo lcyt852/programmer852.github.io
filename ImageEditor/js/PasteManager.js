@@ -134,6 +134,7 @@ PasteManager.prototype.imageHandler=function(image_data){
     {	    	
     	var canvas = canvasManager.putOnCanvas(image);
     	layerManager.newLayer(canvas);
+    	layerManager.centerLayer(canvas);
     	//drag.icon.trigger('mousedown');
     }
     image.onerror=function(){

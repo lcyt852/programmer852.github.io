@@ -27,20 +27,25 @@ Text.prototype.start = function(){
 	});
 
 }
-Text.prototype.stop = function(){}
+Text.prototype.stop = function(){
+	$(document.body).unbind('mousedown.Text')
+}
 Text.prototype.getTextArea = function(x,y){
+
+	var fontSize = 15;
+	var font = 'Arial';
 
 	var $input = $('<input size="2">').css({
 					'position':'absolute',
 					'z-index':'1200',
-					'height':'18px',
+					'height':fontSize+3+"px",
 					'border':'none',
 					'top':y+'px',
 					'left':x+'px',
 					'background':'none',
-					'font-size':'15px',
-					'line-height':'20px',
-					'font-family':'Courier',
+					'font-size':fontSize,
+					'line-height':fontSize,
+					'font-family':font,
 					'pointer-events':'none',									
 					'text-align':'left',
 					'opacity':'1',
@@ -61,6 +66,37 @@ Text.prototype.getTextArea = function(x,y){
 		},
 		focusout:function(e)
 		{
+			//remove unused and whitespaced input
+			if(this.value.replace(/ /g,'').length==0){
+				this.parentNode.removeChild(this);
+				return;
+			}
+
+			//convert text to canvas			
+			canvas = document.createElement('canvas');
+			
+
+			canvas.height = fontSize+3;
+			canvas.width = $(this).width();
+			context = canvas.getContext("2d");
+
+
+			context.font = fontSize+'px '+font;
+			context.fillStyle = colorPicker.color;
+			context.fillText(this.value, 1, fontSize);
+
+			obj = layerManager.newLayer(canvas);
+
+			obj.layer.style.left = this.style.left;
+			obj.layer.style.top = this.style.top;
+			obj.layer.style.position = 'absolute';
+			//$('body').append($(canvas));
+
+			this.parentNode.removeChild(this);
+
+
+	
+
 		},
 		showDragHandle:function()
 		{					
@@ -73,6 +109,7 @@ Text.prototype.getTextArea = function(x,y){
 
 	return $input
 }
+
 
 var text = new Text();
 

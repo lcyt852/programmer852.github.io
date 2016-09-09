@@ -13,13 +13,14 @@ UIManager.prototype.initialize = function(){
 }
 UIManager.prototype.buildToolBars = function(){
 	
-	this.toolbar_doc = new ToolbarMaker(46,'',20,20)
+	//(h,w,y,x)
+	this.toolbar_doc = new ToolbarMaker(46,'',10,10)
 	.addHandle(0).assign(upload).assign(save).insertDivider(0)
 	.assign(backgroundColor).insertDivider(0)	
 	.assign(undo).assign(redo).assign(bin);
 	
 
-	this.toolbar_edit = new ToolbarMaker('',46,80,20)
+	this.toolbar_edit = new ToolbarMaker('',46,60,10)
 	.addHandle(1).assign(drag).assign(pencil).assign(arrow)
 	.assign(text)
 	//.assign(smudge).assign(text).assign(zoom).assign(crop)
@@ -28,7 +29,7 @@ UIManager.prototype.buildToolBars = function(){
 
 
 
-	this.toolbar_sizePicker = new ToolbarMaker('',46,80,70)
+	this.toolbar_sizePicker = new ToolbarMaker('',46,60,60)
 	.addHandle(1).drawInput().drawSizers();
 	this.toolbar_sizePicker.bar.hide();
 
@@ -42,7 +43,7 @@ UIManager.prototype.draw = function(){
 }
 UIManager.prototype.addThumbnail = function(thumb){	
 	if(this.toolbar_layer==undefined){
-		this.toolbar_layer = new ToolbarMaker('',46,80,80);
+		this.toolbar_layer = new ToolbarMaker('',46,60,60); //(h,w,y,x)
 		this.toolbar_layer.addHandle(1);
 		this.toolbar_layer.addSortWrapper();
 		$(this.toolbar_layer.bar).prependTo('body');
@@ -100,12 +101,56 @@ ToolbarMaker.prototype.addHandle = function(o){
 	
 
 
+
 	//make draggable 
 	$(this.bar).draggable({ handle:'.handle' });
 
 	$(this.bar).bind('mousedown',function(e){
 		e.stopPropagation();
 	});
+
+	//make hide-able/expandable by click 
+	$handle.bind('mousedown',function(e){
+		this.downX = this.parentNode.style.left;
+		this.downY = this.parentNode.style.top;
+	});
+	$handle.bind('mouseup',function(e){
+		if((this.downY == this.parentNode.style.top)&&(this.downX==this.parentNode.style.left)){
+			//hide or expand here
+			//depends on orientation o, and hidden or shown status
+
+			$parent = $(this).parent();
+
+			if(typeof this.toggle_ === 'undefined') this.toggle_ = 1; 
+
+			if(o==0){
+				param = 'width';
+				oW = $parent.width();
+				$parent.css('width','auto');
+				autoV = $parent.width();
+				value = (this.toggle_) ? 30 : autoV; 
+				$parent.css('width',oW);
+				params = {width:value};
+			}else{
+				param = 'height';
+				oH = $parent.height();
+				$parent.css('height','auto');
+				autoV = $parent.height();
+				value = (this.toggle_) ? 30 : autoV; 
+				$parent.css('height',oH);
+				params = {height:value};
+			}
+			handle = this;
+
+			//perform hide/show animation
+			$parent.animate(params, 200, function(){
+			    if(!handle.toggle_) $(this).css(param,'auto');
+			    handle.toggle_ = (handle.toggle_) ? 0 : 1;
+
+			});
+		}
+	});
+
 
 	return this;
 }

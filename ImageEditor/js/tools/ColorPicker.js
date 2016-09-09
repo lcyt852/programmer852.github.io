@@ -5,6 +5,8 @@ var ColorPicker = function(){
 	this.noSetActive = 1;
 }
 ColorPicker.prototype.domReady = function(){
+
+	//initialize spectrum color picker	
 	$(this.$icon).spectrum({
 	    color: "#315177",
 	    showButtons: false,
@@ -22,6 +24,7 @@ ColorPicker.prototype.domReady = function(){
 	    localStorageKey: "spectrum.demo",
 	    move: function (color) {
 	    	colorPicker.color = color.toHexString();
+	    	$('#colorIndicator').css('background-color',color.toHexString());
 	    },
 	    show: function () {
 			var c = $(this).spectrum('container');
@@ -34,8 +37,14 @@ ColorPicker.prototype.domReady = function(){
 	    },
 	    beforeShow: function(c){},
 	    hide: function(c){},
-	    change: function(c){}
+	    change: function(c){
+	    }
 	});
+
+	//add color indicator to the icon thumbnail, set default color
+	this.$icon.wrap("<div class='iconWrap'></div>");
+	this.$icon.before("<div id='colorIndicator'></div>");
+	$('#colorIndicator').css('background-color',this.color);
 
 }
 ColorPicker.prototype.start = function(){}

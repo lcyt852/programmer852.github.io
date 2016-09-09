@@ -7,6 +7,7 @@ LayerManager.prototype.createThumbnail = function(canvas){
 	canvas = canvasManager.getThumbImage(canvas,35,35);	
 	return uiManager.addThumbnail(canvas.toDataURL());
 }
+
 LayerManager.prototype.newLayer = function(canvas){
 	this.centerLayer(canvas);   
     $(canvas).addClass('layer').appendTo('body');    
