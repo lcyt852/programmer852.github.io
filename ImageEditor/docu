@@ -62,7 +62,7 @@ Found in /js/tools directory. They have the following code structure:
 var ModuleName = function(){
 	this.title = 'Module Name';
 	this.iconUrl = 'icon.png'; 
-	this.cursor = 'cursor-url.png'; //optional, default if not defined
+	this.cursor = 'cursor-url.png'; //optional, default no cursor if not defined
 	this.noSetActive = 0;  bool, optional, when tool/icon doesnt need active state on press
 }
 

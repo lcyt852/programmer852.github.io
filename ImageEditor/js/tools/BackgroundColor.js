@@ -30,7 +30,8 @@ BackgroundColor.prototype.domReady = function(){
 	    		$('body').css('background',color.toHexString());	    		
 	    		$('#bgColorIndicator').css('background-color',color.toHexString());
 	    		
-	    	}	    	
+	    	}
+	    	backgroundColor.color = color.toHexString();
 	    },
 	    show: function () {
 			var c = $(this).spectrum('container');

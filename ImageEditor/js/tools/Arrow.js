@@ -6,31 +6,31 @@ var Arrow = function(){
 Arrow.prototype.domReady = function(){
 }
 Arrow.prototype.start = function(){
-	this.layerHolder = layerManager.newLayer(this.getCanvas());	 	
-	this.canvas = this.layerHolder.layer;
-	this.$thumb = this.layerHolder.$thumb;
 
-	function getTempCanv(){
-		tmpCvs = document.createElement('canvas');
-		tmpCvs.width = self.canvas.width;
-		tmpCvs.height = self.canvas.height;
-		$(tmpCvs).appendTo('body'); 		
-		return tmpCvs;
-	} 
-	this.tmpCvs = getTempCanv();
 
 
 	self = this;
 	$(document.body).bind('mousedown.Arrow',function(e){
 		if(e.button!==0)return;
+
+
+
+		
+
+		canvs = self.getCanvas();
+		ctx = canvs.getContext("2d");
+		obj = layerManager.newLayer(canvs);	 
+		self.obj = obj;
+		
+
+
+
+
 		self.x1 = e.originalEvent.pageX - $(this).offset().left;
 		self.y1 = e.originalEvent.pageY - $(this).offset().top; 
 
-		self.isWindowSameSize();
+		self.isWindowSameSize(canvas);
 
-		context = self.canvas.getContext("2d");
-		tmpCvs = self.tmpCvs;
-		tmpCtx = tmpCvs.getContext("2d");
 
 
 		$(this).bind('mousemove.Arrow',function(e)
@@ -38,22 +38,21 @@ Arrow.prototype.start = function(){
 	    	self.x2 = e.originalEvent.pageX - $(this).offset().left;
 			self.y2 = e.originalEvent.pageY - $(this).offset().top; 
 
-			tmpCtx.clearRect(0,0,tmpCvs.width,tmpCvs.height);
-			self.drawArrow(tmpCtx);
+			ctx.clearRect(0,0,canvs.width,canvs.height);
+			self.drawArrow(ctx);
+			obj.$thumb.attr('src',canvs.toDataURL());	 
 
-			//context.lineTo(x,y);		    		
-			//context.stroke();
 	    });	 
 
-		//clear temp canvas, assign to main canvas-context, 
 		$(this).bind('mouseup.Arrow',function(e)
 		{
 			if(e.button!==0)return;		
 			$(this).unbind('mousemove.Arrow');		
 			$(this).unbind('mouseup.Arrow');	
-			context.drawImage(tmpCvs,0,0);	
-			tmpCtx.clearRect(0,0,tmpCvs.width,tmpCvs.height);
-			self.$thumb.attr('src',self.canvas.toDataURL());
+
+			//redraw layer to min dimensions needed for arrow size
+			self.cropImageFromCanvas(ctx,canvs);
+
 	    });	
 
 
@@ -63,7 +62,6 @@ Arrow.prototype.start = function(){
 		e.originalEvent.stopPropagation();
 	}).bind('mouseout.Arrow',function(e){
 
-		console.log('stop');
 	});
 
 }
@@ -140,25 +138,66 @@ Arrow.prototype.getCanvas = function(i){
 	this.applyStlye(context);
 	return canvas;
 }
-Arrow.prototype.applyStlye = function(ctx){
+Arrow.prototype.applyStlye = function(context){
 	context.strokeStyle = '#fff';
 	context.lineWidth = 5;
 	context.lineCap="round";
 	context.lineJoin = 'round';
 }
-Arrow.prototype.isWindowSameSize = function(){
+Arrow.prototype.isWindowSameSize = function(canvasO){
 	//do nothing if same size, else redraw canvas 
-	if((this.canvas.width===$(window).width())&&(this.canvas.height===$(window).height()))return;
+	if((canvasO.width===$(window).width())&&(canvasO.height===$(window).height()))return;
 
 	canvas = this.getCanvas();
-	canvas.getContext("2d").drawImage(this.canvas, 0, 0);
+	canvas.getContext("2d").drawImage(canvasO, 0, 0);
 
-	this.canvas.width = $(window).width();
-	this.canvas.height = $(window).height();
-	context = this.canvas.getContext("2d");
+	canvasO.width = $(window).width();
+	canvasO.height = $(window).height();
+	context = canvasO.getContext("2d");
 	context.drawImage(canvas, 0, 0);
 	this.applyStlye(context);
 	$(canvas).remove();	
+}
+Arrow.prototype.cropImageFromCanvas = function(ctx, canvas){
+
+	var w = canvas.width,
+	h = canvas.height,
+	pix = {x:[], y:[]},
+	imageData = ctx.getImageData(0,0,canvas.width,canvas.height),
+	x, y, index;
+
+	for (y = 0; y < h; y++) {
+	    for (x = 0; x < w; x++) {
+	        index = (y * w + x) * 4;
+	        if (imageData.data[index+3] > 0) {
+
+	            pix.x.push(x);
+	            pix.y.push(y);
+
+	        }   
+	    }
+	}
+	pix.x.sort(function(a,b){return a-b});
+	pix.y.sort(function(a,b){return a-b});
+	var n = pix.x.length-1;
+
+	//empty canvas so delete it, remove layerbar if empty
+	if(n==-1){
+		this.obj.layer.parentNode.removeChild(this.obj.layer);
+		this.obj.$thumb.get(0).parentNode.removeChild(this.obj.$thumb.get(0));
+		uiManager.deleteEmptyLayerBar();
+		return	
+	}
+
+	w = pix.x[n] - pix.x[0];
+	h = pix.y[n] - pix.y[0];
+	var cut = ctx.getImageData(pix.x[0], pix.y[0], w, h);
+
+	canvas.width = w;
+	canvas.height = h;
+	canvas.style.top = pix.y[0];
+	canvas.style.left = pix.x[0];
+	ctx.putImageData(cut, 0, 0);
 }
 var arrow = new Arrow();
 

@@ -54,6 +54,7 @@ Pencil.prototype.start = function(){
 Pencil.prototype.stop = function(){
 	$(document.body).unbind('mousedown.Pencil mouseup.Pencil dragstart.Pencil');
 	uiManager.toolbar_sizePicker.bar.hide();
+	this.cropImageFromCanvas(self.canvas.getContext("2d"),self.canvas);
 }
 Pencil.prototype.applyStlye = function(ctx){
 	context.strokeStyle = colorPicker.color;
@@ -82,6 +83,47 @@ Pencil.prototype.isWindowSameSize = function(){
 	context.drawImage(canvas, 0, 0);
 	$(canvas).remove();	
 
+}
+Pencil.prototype.cropImageFromCanvas = function(ctx, canvas){
+
+	var w = canvas.width,
+	h = canvas.height,
+	pix = {x:[], y:[]},
+	imageData = ctx.getImageData(0,0,canvas.width,canvas.height),
+	x, y, index;
+
+	for (y = 0; y < h; y++) {
+	    for (x = 0; x < w; x++) {
+	        index = (y * w + x) * 4;
+	        if (imageData.data[index+3] > 0) {
+
+	            pix.x.push(x);
+	            pix.y.push(y);
+
+	        }   
+	    }
+	}
+	pix.x.sort(function(a,b){return a-b});
+	pix.y.sort(function(a,b){return a-b});
+	var n = pix.x.length-1;
+
+	//empty canvas so delete it, remove layerbar if empty
+	if(n==-1){
+		this.canvas.parentNode.removeChild(this.canvas);
+		this.$thumb.get(0).parentNode.removeChild(this.$thumb.get(0));
+		uiManager.deleteEmptyLayerBar();
+		return	
+	}
+
+	w = pix.x[n] - pix.x[0];
+	h = pix.y[n] - pix.y[0];
+	var cut = ctx.getImageData(pix.x[0], pix.y[0], w, h);
+
+	canvas.width = w;
+	canvas.height = h;
+	canvas.style.top = pix.y[0];
+	canvas.style.left = pix.x[0];
+	ctx.putImageData(cut, 0, 0);
 }
 var pencil = new Pencil();
 
